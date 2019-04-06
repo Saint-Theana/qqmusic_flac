@@ -9,8 +9,12 @@ import javax.net.ssl.*;
 
 public class QQmusic extends HttpServlet {
 	
-	String header = "<html><head></head><form method=\"get\" action=\"/qqmusic\"><body><input type=\"text\" placeholder=\"";
-	String body = "\" name=\"keyword\"><button type=\"submit\">搜索</button></form>";
+	String header = "<html><head>";
+	String meta = "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no\">";
+	String style = "<style>.item1{ text-align: center; margin: 0px auto;}</style>";
+	String headerend = "</head>";
+	String body = "<body> <div class=\"item1\"><a href=\"https://github.com/Saint-Theana\" class=\"button\">Created By: Saint-Theana</a><form method=\"get\" action=\"/qqmusic\">";
+	String bodyend = "<button type=\"submit\">搜索</button></form></div>";
 	String end ="</body></html>";
 	
 	public QQmusic(){
@@ -29,14 +33,21 @@ public class QQmusic extends HttpServlet {
 		String ua = resp.getHeader("user-agent");
 		PrintWriter writer = resp.getWriter();
 		String keyword = req.getParameter("keyword");
+		writer.println(header);
+		writer.println(meta);
+		writer.println(style);
+		writer.println(headerend);
+		writer.println(body);
+	
 		if(keyword==null){
-			keyword="请输入关键词(歌手/歌名...)";
+			writer.println("<input type=\"text\" placeholder=\"请输入关键词(歌手/歌名...)\" name=\"keyword\">");
+		}else{
+			writer.println("<input type=\"text\" value=\""+keyword+"\" name=\"keyword\">");
 		}
-		writer.println(header+keyword+body);
-		if(!keyword.equals("请输入关键词(歌手/歌名...)")){
+		writer.println(bodyend);
+		if(keyword!=null){
 			this.music(writer,keyword,ua);
 		}
-		writer.write("<br>");
 		
 		writer.print(end);
 		writer.flush();
