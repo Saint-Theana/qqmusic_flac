@@ -59,8 +59,12 @@ public class QQmusic extends HttpServlet {
 		page =String.valueOf(realpage);
 		
 		writer.println(bodyend);
-		if(keyword!=null){
+		if(keyword!=null&&!keyword.isEmpty()){
 			this.music(writer,keyword,ua,page);
+		}else{
+			writer.flush();
+			writer.close();
+			return;
 		}
 		if(page.equals("1")){
 		    writer.print("<div class=\"item-left\"><a ><button class=\"login-button\">上一页</button></a></div>");
