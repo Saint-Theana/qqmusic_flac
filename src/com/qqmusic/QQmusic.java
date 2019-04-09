@@ -11,7 +11,7 @@ public class QQmusic extends HttpServlet {
 	
 	String header = "<html><head>";
 	String meta = "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no\">";
-	String style = "<style>#container {width: 500px;height: 820px;margin: 0 auto;}div.search {padding: 30px 0;} form {position: relative;width: 300px;margin: 0 auto;} input, button {border: none;outline: none;} input {width: 100%;height: 42px;padding-left: 13px;} button {height: 42px;width: 42px;cursor: pointer;position: absolute;}.bar6 {background: #F9F0DA;}.bar6 input {border: 2px solid #c5464a;border-radius: 5px;background: transparent;top: 0;right: 0;}.bar6 button {background: #c5464a;border-radius: 0 5px 5px 0;width: 60px;top: 0;right: 0;}.bar6 button:before {content: \"搜索\";font-size: 13px;color: #F9F0DA;}.item1{border-radius: 0 5px 5px 0;text-align: center;margin: 0px auto;}.item2{background: #F9F0DA;height: 26px;}.item3{background: #c5464a;height: 24px;cursor: pointer;position: absolute;}.item2 button {font-size: 13px;color: #F9F0DA;}.item-left{background: #F9F0DA;height: 26px;width:33.3%;float:left;}.item-left button {font-size: 13px;color: #F9F0DA;}.item-right{background: #F9F0DA;height: 26px;width:33.3%;float:right;}.item-right button {font-size: 13px;color: #F9F0DA;}.item-center{background: #F9F0DA;height: 26px;width:33.3%;}.item-center button {font-size: 13px;color: #F9F0DA;}.login-button { 	height: 40px; 	border-width: 0px; 	border-radius: 3px; 	background: #c5464a; 	cursor: pointer; 	outline: none; 	font-family: Microsoft YaHei; 	color: white; 	font-size: 17px; width:33.3%;}</style>";
+	String style = "<style>#container {	width: 500px;	height: 820px;	margin: 0 auto;}div.search {	padding: 30px 0;}form {	position: relative;	width: 300px;	margin: 0 auto;}input, button {	border: none;	outline: none;}input {	width: 100%;	height: 42px;	padding-left: 13px;}button {	height: 42px;	width: 42px;	cursor: pointer;	position: absolute;}.bar6 {	}.bar6 input {	border: 2px solid #c5464a;	border-radius: 5px;	background: transparent;	top: 0;	right: 0;}.bar6 button {	background: #c5464a;	border-radius: 0 5px 5px 0;	width: 60px;	top: 0;	right: 0;}.bar6 button:before {	content: \"搜索\";	font-size: 13px;	color: #F9F0DA;}.item1 {	border-radius: 0 5px 5px 0;	text-align: center;	margin: 0px auto;}.item3 {	background: #c5464a;	height: 24px;	cursor: pointer;	position: absolute;}.item-left {	background: #F9F0DA;	height: 26px;	width: 33.3%;	float: left;}.item-left button {	font-size: 13px;	color: #F9F0DA;}.item-right {	background: #F9F0DA;	height: 26px;	width: 33.3%;	float: right;}.item-right button {	font-size: 13px;	color: #F9F0DA;}.item-center {	background: #F9F0DA;	height: 26px;	width: 33.3%;}.item-center button {	font-size: 13px;	color: #F9F0DA;}.login-button {	height: 40px;	border-width: 0px;	border-radius: 3px;	background: #c5464a;	cursor: pointer;	outline: none;	font-family: Microsoft YaHei;	color: white;	font-size: 17px;	width: 33.3%;}.musicname {padding-top:15px;text-align:center;font-size:15px;}.singername {padding-top:15px;text-align:center;font-size:15px;}.card {box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);transition: 0.3s;width: 100%;height: 100px;border-radius: 5px;position:relative;}​.test{}.test span{display: none;}.test:hover span{ display:block;transition: 0.3s;border-radius: 5px;box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);position:absolute;top:100px;width:100%;height:100px;background-color:white;color:black; z-index:2;}​.audio {width:100%;}.songimg {float:left;transition: 0.3s;border-radius: 5px;}.srcbutton {transition: 0.3s; width:25%;background-color:white;border-radius: 5px;}</style>";
 	String headerend = "</head>";
 	String body = "<body> <div class=\"search bar6\"><form method=\"get\" action=\"/qqmusic\">";
 	String bodyend = "<button type=\"submit\"></button></form></div>";
@@ -88,36 +88,47 @@ public class QQmusic extends HttpServlet {
 		    JSONArray song_list = json_root.getJSONObject("data").getJSONObject("song").getJSONArray("list");
 			for (int time = 0; time < song_list.length(); time++)
 			{
-				writer.println("<div class=\"item2\">");
+				writer.println("<div class=\"card\">");
 				String vkey=this.getvkey(ua);
 				
 				JSONObject song_root = song_list.getJSONObject(time);
 				JSONObject song_files = song_root.getJSONObject("file");
 				String author_name = song_root.getJSONArray("singer").getJSONObject(0).getString("name");
 				String song_name = song_root.getString("title");
-				writer.write("<text>"+song_name +" " +author_name+" "+"</text>");
+				String album_id =song_root.getJSONObject("album").getString("mid");
 				String song_id = song_files.getString("media_mid");
+				
+				String img ="";
+				if(!album_id.isEmpty()&&!(album_id==null)&&album_id.split("").length>2){
+				   img= "http://imgcache.qq.com/music/photo/mid_album_500/"+album_id.split("")[album_id.split("").length -2]+"/"+album_id.split("")[album_id.split("").length -1]+"/"+album_id+".jpg";
+				}else{
+					img="http://imgcache.qq.com/music/photo/mid_album_500/M/g/001ZaCQY2OxVMg.jpg";
+				}
+				writer.print("<div class=\"songimg\"> <img class=\"songimg\" src=\""+img+"\" width=\"100\" height=\"100\" /></div>");
+				writer.write("<div class=\"test\"><div class=\"musicname\" >"+song_name+"</div><div class=\"singername\">"+author_name+"</div>");
+				writer.write("<span><div class=\"audio\"><audio src=\"http://mobileoc.music.tc.qq.com/M500"+song_id+".mp3?vkey="+vkey+"&guid=FUCK&uin=0&fromtag=8\" controls=\"controls\">your browser does not support the audio element</audio></div>");
+				writer.write("<div>");
 				long quality_128 = song_files.getLong("size_128");
 				long quality_320 = song_files.getLong("size_320");
 				long quality_ape = song_files.getLong("size_ape");
 				long quality_flac = song_files.getLong("size_flac");
+				int possition =0;
 				if(quality_128!=0){
-					writer.print("<a href=\"http://mobileoc.music.tc.qq.com/M500"+song_id+".mp3?vkey="+vkey+"&guid=FUCK&uin=0&fromtag=8\" class=\"button\"><button class=\"item3\">128K</button></a>");
-					writer.print("&emsp;&emsp;&emsp;");
+					writer.print("<div style=\"padding-left:"+possition+"%;\"><a href=\"http://mobileoc.music.tc.qq.com/M500"+song_id+".mp3?vkey="+vkey+"&guid=FUCK&uin=0&fromtag=8\"><button class=\"srcbutton\">128K</button></a></div>");
 				}
 				if(quality_320!=0){
-					writer.print("<a href=\"http://mobileoc.music.tc.qq.com/M800"+song_id+".mp3?vkey="+vkey+"&guid=FUCK&uin=0&fromtag=53\" class=\"button\"><button class=\"item3\">320K</button></a>");
-					writer.print("&emsp;&emsp;&emsp;");
-				}
+					possition+=25;
+					writer.print("<div style=\"padding-left:"+possition+"%;\"><a href=\"http://mobileoc.music.tc.qq.com/M800"+song_id+".mp3?vkey="+vkey+"&guid=FUCK&uin=0&fromtag=53\"><button class=\"srcbutton\">320K</button></a></div>");
+									}
 				if(quality_ape!=0){
-					writer.print("<a href=\"http://mobileoc.music.tc.qq.com/A000"+song_id+".ape?vkey="+vkey+"&guid=FUCK&uin=0&fromtag=53\" class=\"button\"><button class=\"item3\">ape</button></a>");
-					writer.print("&emsp;&emsp;&emsp;");
+					possition+=25;
+					writer.print("<div style=\"padding-left:"+possition+"%;\"><a href=\"http://mobileoc.music.tc.qq.com/A000"+song_id+".ape?vkey="+vkey+"&guid=FUCK&uin=0&fromtag=53\"><button class=\"srcbutton\">ape</button></a></div>");
 				}
 				if(quality_flac!=0){
-					writer.print("<a href=\"http://mobileoc.music.tc.qq.com/F000"+song_id+".flac?vkey="+vkey+"&guid=FUCK&uin=0&fromtag=53\" class=\"button\"><button class=\"item3\">flac</button></a>");
-					writer.print("&emsp;&emsp;&emsp;");
+					possition+=25;
+					writer.print("<div style=\"padding-left:"+possition+"%;\"><a href=\"http://mobileoc.music.tc.qq.com/F000"+song_id+".flac?vkey="+vkey+"&guid=FUCK&uin=0&fromtag=53\"><button class=\"srcbutton\">flac</button></a></div>");
 				}
-			
+				writer.write("</div></span></div>");
 				
 				writer.println("</div>");
 				writer.println("<br>");
