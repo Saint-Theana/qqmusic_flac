@@ -16,15 +16,23 @@ public class QQmusic extends HttpServlet {
 	String body = "<body> <div class=\"search bar6\"><form method=\"get\" action=\"/qqmusic\">";
 	String bodyend = "<button type=\"submit\"></button></form></div>";
 	String end ="<div class=\"item1\"><a href=\"https://github.com/Saint-Theana\" >Creaed By: Saint-Theana</a></div></body></html>";
-	
+	String authst;
 	public QQmusic(){
 		try
 		{
 			Util.trustAllHttpsCertificates();
 			HttpsURLConnection.setDefaultHostnameVerifier(Util.hv);
+			this.authst =this.getauthst();
 		}
 		catch (Exception e)
 		{}
+	}
+
+	private String getauthst()
+	{
+		String a = Util.Curl("http://114.115.239.164:8080/api/Authst").replaceAll("\"","");
+		String textData = new StringBuilder(new String(Base64.getDecoder().decode(new StringBuilder(a).reverse().toString()))).reverse().toString();
+		return new String(Base64.getDecoder().decode(textData.substring(1, textData.length() - 2)));
 	}
 	
 	
@@ -89,15 +97,13 @@ public class QQmusic extends HttpServlet {
 			for (int time = 0; time < song_list.length(); time++)
 			{
 				writer.println("<div class=\"card\">");
-				String vkey=this.getvkey(ua);
-				
 				JSONObject song_root = song_list.getJSONObject(time);
 				JSONObject song_files = song_root.getJSONObject("file");
 				String author_name = song_root.getJSONArray("singer").getJSONObject(0).getString("name");
 				String song_name = song_root.getString("title");
 				String album_id =song_root.getJSONObject("album").getString("mid");
 				String song_id = song_files.getString("media_mid");
-				
+				String mid = song_root.getString("mid");
 				String img ="";
 				if(!album_id.isEmpty()&&!(album_id==null)&&album_id.split("").length>2){
 				   img= "http://imgcache.qq.com/music/photo/mid_album_500/"+album_id.split("")[album_id.split("").length -2]+"/"+album_id.split("")[album_id.split("").length -1]+"/"+album_id+".jpg";
@@ -106,7 +112,7 @@ public class QQmusic extends HttpServlet {
 				}
 				writer.print("<div class=\"songimg\"> <img class=\"songimg\" src=\""+img+"\" width=\"100\" height=\"100\" /></div>");
 				writer.write("<div class=\"test\"><div class=\"musicname\" >"+song_name+"</div><div class=\"singername\">"+author_name+"</div>");
-				writer.write("<span><div class=\"audio\"><audio src=\"http://mobileoc.music.tc.qq.com/M500"+song_id+".mp3?vkey="+vkey+"&guid=FUCK&uin=0&fromtag=8\" controls=\"controls\">your browser does not support the audio element</audio></div>");
+				writer.write("<span><div class=\"audio\"><audio src=\""+this.geturl(mid,"M500"+song_id+".mp3")+"\" controls=\"controls\">your browser does not support the audio element</audio></div>");
 				writer.write("<div>");
 				long quality_128 = song_files.getLong("size_128");
 				long quality_320 = song_files.getLong("size_320");
@@ -114,19 +120,19 @@ public class QQmusic extends HttpServlet {
 				long quality_flac = song_files.getLong("size_flac");
 				int possition =0;
 				if(quality_128!=0){
-					writer.print("<div style=\"padding-left:"+possition+"%;\"><a href=\"http://mobileoc.music.tc.qq.com/M500"+song_id+".mp3?vkey="+vkey+"&guid=FUCK&uin=0&fromtag=8\"><button class=\"srcbutton\">128K</button></a></div>");
+					writer.print("<div style=\"padding-left:"+possition+"%;\"><a href=\""+this.geturl(mid,"M500"+song_id+".mp3")+"\"><button class=\"srcbutton\">128K</button></a></div>");
 				}
 				if(quality_320!=0){
 					possition+=25;
-					writer.print("<div style=\"padding-left:"+possition+"%;\"><a href=\"http://mobileoc.music.tc.qq.com/M800"+song_id+".mp3?vkey="+vkey+"&guid=FUCK&uin=0&fromtag=53\"><button class=\"srcbutton\">320K</button></a></div>");
+					writer.print("<div style=\"padding-left:"+possition+"%;\"><a href=\""+this.geturl(mid,"M800"+song_id+".mp3")+"\"><button class=\"srcbutton\">320K</button></a></div>");
 									}
 				if(quality_ape!=0){
 					possition+=25;
-					writer.print("<div style=\"padding-left:"+possition+"%;\"><a href=\"http://mobileoc.music.tc.qq.com/A000"+song_id+".ape?vkey="+vkey+"&guid=FUCK&uin=0&fromtag=53\"><button class=\"srcbutton\">ape</button></a></div>");
+					writer.print("<div style=\"padding-left:"+possition+"%;\"><a href=\""+this.geturl(mid,"A000"+song_id+".ape")+"\"><button class=\"srcbutton\">ape</button></a></div>");
 				}
 				if(quality_flac!=0){
 					possition+=25;
-					writer.print("<div style=\"padding-left:"+possition+"%;\"><a href=\"http://mobileoc.music.tc.qq.com/F000"+song_id+".flac?vkey="+vkey+"&guid=FUCK&uin=0&fromtag=53\"><button class=\"srcbutton\">flac</button></a></div>");
+					writer.print("<div style=\"padding-left:"+possition+"%;\"><a href=\""+this.geturl(mid,"F000"+song_id+".flac")+"\"><button class=\"srcbutton\">flac</button></a></div>");
 				}
 				writer.write("</div></span></div>");
 				
@@ -140,23 +146,26 @@ public class QQmusic extends HttpServlet {
 		}
 		
 	}
+
 	
-	
-	
-	
-	private String getvkey(String ua)
+	private String geturl(String mid, String file)
 	{
-		String result = Util.curl_with_referer(ua,"https://"+Util.http_dns("c.y.qq.com")+"/base/fcgi-bin/fcg_music_express_mobile3.fcg?g_tk=556936094&loginUin=0&hostUin=0&format=json&platform=yqq&needNewCode=0&cid=205361747&uin=0&songmid=003a1tne1nSz1Y&filename=C400003a1tne1nSz1Y.m4a&guid=FUCK","https://y.qq.com/portal/profile.html");
+		
+		String pd = "{\"modulevkey\":{\"method\":\"CgiGetVkey\",\"module\":\"vkey.GetVkeyServer\",\"param\":{\"uin\":\"1920363953\",\"filename\":[\""+file+"\"],\"ctx\":1,\"guid\":\"QMD\",\"referer\":\"y.qq.com\",\"songmid\":[\""+mid+"\"]}},\"comm\":{\"authst\":\""+this.authst+"\",\"chid\":\"10034015\",\"ct\":\"3\",\"cv\":\"4120104\",\"qq\":\"1920363953\"}}";
+		
+		String data = Util.post_with_data("https://u.y.qq.com/cgi-bin/musicu.fcg",pd);
+		
 		try
 		{
-			JSONObject json_root = new JSONObject(result);
-			return json_root.getJSONObject("data").getJSONArray("items").getJSONObject(0).getString("vkey");
+			JSONObject y = new JSONObject(data);
+			return "http://mobileoc.music.tc.qq.com/"+y.getJSONObject("modulevkey").getJSONObject("data").getJSONArray("midurlinfo").getJSONObject(0).getString("purl");
+			
 		}
 		catch (JSONException e)
 		{
-			e.printStackTrace();
 			return null;
 		}
+
 	
 	}
 }
